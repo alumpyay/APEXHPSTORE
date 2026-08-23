@@ -1,12 +1,12 @@
 {
-  "projectId": "central-abbey-46tp2",
-  "appId": "1:500998069889:web:b048aab6139038e591f780",
-  "apiKey": "AIzaSyDvZY4rn4BBvwxaQbgbMvBK9oqMmAzpzuc",
-  "authDomain": "central-abbey-46tp2.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-apexjerseystores-8cd8fdaa-5507-47cd-824e-e5560dd1f9b2",
-  "storageBucket": "central-abbey-46tp2.firebasestorage.app",
-  "messagingSenderId": "500998069889",
-  "measurementId": "",
-  "oAuthClientId": "500998069889-8d3d70cqc9c4mnb0d10989asrsmmegq0.apps.googleusercontent.com",
+  "projectId": "apexhpstore",
+  "appId": "1:869515679582:web:e1525d16e3550cec16e1cf",
+  "apiKey": "AIzaSyCCqfWmL34VSiNr8U82O1vOMjQcy4gr28Q",
+  "authDomain": "apexhpstore.firebaseapp.com",
+  "storageBucket": "apexhpstore.firebasestorage.app",
+  "messagingSenderId": "869515679582",
+  "measurementId": "G-SZZJG5VTLK",
+  "firestoreDatabaseId": "(default)",
+  "oAuthClientId": "",
   "recaptchaSiteKey": ""
 }

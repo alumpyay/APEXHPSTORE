@@ -260,7 +260,7 @@ export const AdminPortal: React.FC = () => {
                     if (error?.code === 'auth/cancelled-popup-request' || error?.code === 'auth/popup-closed-by-user') {
                       setLoginError('Sign-in popup was blocked or closed. Please click "Open App in New Tab" at the top right of the preview and try again, or ensure popups are allowed.');
                     } else {
-                      setLoginError('Authentication failed. You must be an authorized admin.');
+                      setLoginError(error?.message ? `Login failed: ${error.message} (Note: If you are on Vercel, you may need to add your Vercel domain to Firebase Auth Authorized Domains)` : 'Authentication failed. You must be an authorized admin.');
                     }
                   }
                 }}
