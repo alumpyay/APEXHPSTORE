@@ -15,12 +15,25 @@ export const Footer: React.FC = () => {
   const { 
     setIsOrderTrackerOpen, 
     setIsAdminPortalOpen,
+    isAdminLoggedIn,
     siteContent,
     setIsSiteContentModalOpen
   } = useStore();
 
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
+  const [adminClickCount, setAdminClickCount] = useState(0);
+
+  const handleAdminSecretClick = () => {
+    setAdminClickCount(prev => {
+      const newCount = prev + 1;
+      if (newCount >= 3) {
+        setIsAdminPortalOpen(true);
+        return 0;
+      }
+      return newCount;
+    });
+  };
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,13 +140,17 @@ export const Footer: React.FC = () => {
         {/* Bottom copyright */}
         <div className="pt-8 mt-8 border-t border-zinc-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-zinc-500">
           <div>
-            © 2026 Apex Jerseys Co. All rights reserved. Built with precision for athletic fans worldwide.
+            <span onClick={handleAdminSecretClick} className="cursor-default selection:bg-transparent">© 2026 Apex Jerseys Co. All rights reserved. Built with precision for athletic fans worldwide.</span>
           </div>
           <div className="flex items-center gap-4">
-            <button onClick={() => setIsAdminPortalOpen(true)} className="hover:text-zinc-300 transition-colors flex items-center gap-1">
-              <Lock className="w-3 h-3" /> Backend Console
-            </button>
-            <span>•</span>
+            {isAdminLoggedIn && (
+              <>
+                <button onClick={() => setIsAdminPortalOpen(true)} className="hover:text-zinc-300 transition-colors flex items-center gap-1">
+                  <Lock className="w-3 h-3" /> Backend Console
+                </button>
+                <span>•</span>
+              </>
+            )}
             <button onClick={() => setIsOrderTrackerOpen(true)} className="hover:text-zinc-300 transition-colors">
               GPS Shipment Radar
             </button>

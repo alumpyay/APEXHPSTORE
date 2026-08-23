@@ -20,6 +20,7 @@ export const Navbar: React.FC = () => {
     setIsOrderTrackerOpen, 
     wishlist, 
     setIsAdminPortalOpen,
+    isAdminLoggedIn,
     theme,
     toggleTheme,
     filters,
@@ -41,14 +42,16 @@ export const Navbar: React.FC = () => {
             {siteContent.topBannerCode}
           </span>
         )}
-        <button
-          onClick={() => setIsSiteContentModalOpen(true)}
-          className="ml-2 p-0.5 hover:bg-zinc-950/20 rounded text-zinc-950 font-bold text-[10px] flex items-center gap-1 cursor-pointer"
-          title="Edit Site Text & Banner (စာပြင်ရန်)"
-        >
-          <Edit3 className="w-3 h-3" />
-          <span className="hidden sm:inline">Edit Text</span>
-        </button>
+        {isAdminLoggedIn && (
+          <button
+            onClick={() => setIsSiteContentModalOpen(true)}
+            className="ml-2 p-0.5 hover:bg-zinc-950/20 rounded text-zinc-950 font-bold text-[10px] flex items-center gap-1 cursor-pointer"
+            title="Edit Site Text & Banner (စာပြင်ရန်)"
+          >
+            <Edit3 className="w-3 h-3" />
+            <span className="hidden sm:inline">Edit Text</span>
+          </button>
+        )}
       </div>
 
       {/* Main Navbar */}
@@ -188,27 +191,31 @@ export const Navbar: React.FC = () => {
               )}
             </button>
 
-            {/* Edit Site Text & Content Button */}
-            <button
-              id="nav-edit-site-btn"
-              onClick={() => setIsSiteContentModalOpen(true)}
-              title="Edit Website Texts & Images (ဆိုဒ်စာသားများ ပြင်ရန်)"
-              className="flex items-center gap-1.5 bg-amber-400/10 hover:bg-amber-400 text-amber-400 hover:text-zinc-950 px-2.5 py-2 rounded-lg border border-amber-400/30 text-xs font-bold transition-all cursor-pointer"
-            >
-              <Edit3 className="w-4 h-4" />
-              <span className="hidden sm:inline text-[11px]">Edit Site (ပြင်ရန်)</span>
-            </button>
+            {/* Edit Site Text & Content Button (Admin Only) */}
+            {isAdminLoggedIn && (
+              <button
+                id="nav-edit-site-btn"
+                onClick={() => setIsSiteContentModalOpen(true)}
+                title="Edit Website Texts & Images (ဆိုဒ်စာသားများ ပြင်ရန်)"
+                className="flex items-center gap-1.5 bg-amber-400/10 hover:bg-amber-400 text-amber-400 hover:text-zinc-950 px-2.5 py-2 rounded-lg border border-amber-400/30 text-xs font-bold transition-all cursor-pointer"
+              >
+                <Edit3 className="w-4 h-4" />
+                <span className="hidden sm:inline text-[11px]">Edit Site (ပြင်ရန်)</span>
+              </button>
+            )}
 
-            {/* Admin Portal Gateway */}
-            <button
-              id="nav-admin-portal-btn"
-              onClick={() => setIsAdminPortalOpen(true)}
-              title="Backend Store Management"
-              className="flex items-center gap-1 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-400 hover:text-amber-400 p-2 rounded-lg border border-zinc-800/80 text-xs transition-colors"
-            >
-              <ShieldCheck className="w-4 h-4" />
-              <span className="hidden xl:inline text-[11px] font-medium">Admin</span>
-            </button>
+            {/* Admin Portal Gateway (Admin Only) */}
+            {isAdminLoggedIn && (
+              <button
+                id="nav-admin-portal-btn"
+                onClick={() => setIsAdminPortalOpen(true)}
+                title="Backend Store Management"
+                className="flex items-center gap-1 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-400 hover:text-amber-400 p-2 rounded-lg border border-zinc-800/80 text-xs transition-colors"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                <span className="hidden md:inline font-bold">Admin</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
