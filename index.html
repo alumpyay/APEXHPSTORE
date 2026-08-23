@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      (function() {
+        try {
+          var currentFetch = window.fetch ? window.fetch.bind(window) : undefined;
+          var desc = Object.getOwnPropertyDescriptor(window, 'fetch') || Object.getOwnPropertyDescriptor(Window.prototype, 'fetch');
+          if (!desc || !desc.set) {
+            Object.defineProperty(window, 'fetch', {
+              get: function() {
+                return currentFetch;
+              },
+              set: function(newFetch) {
+                currentFetch = newFetch;
+              },
+              configurable: true,
+              enumerable: true
+            });
+          }
+        } catch (e) {
+          console.warn('Window fetch patch warning:', e);
+        }
+      })();
+    </script>
+    <title>Apex Jersey Store & Studio | Match Kits & Customizer</title>
+    <meta name="description" content="Premium sports jersey e-commerce store with live inventory tracking, personalized 3D jersey studio, real-time GPS shipping tracking, and MMK support." />
+    <meta property="og:title" content="Apex Jersey Store & Studio" />
+    <meta property="og:description" content="Shop 2024/25 jerseys and personalize custom fan kits with live inventory tracking." />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+  </head>
+  <body class="bg-zinc-950 text-zinc-100 antialiased">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

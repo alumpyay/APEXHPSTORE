@@ -1,0 +1,177 @@
+@import "tailwindcss";
+
+/* Scrollbar suppression & Custom styling */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+/* Custom smooth dark scrollbar for modal bodies */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(24, 24, 27, 0.5);
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(82, 82, 91, 0.6);
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(245, 158, 11, 0.8);
+}
+
+/* Myanmar text baseline and line clearance */
+body, button, input, textarea, select, span, p, h1, h2, h3, h4 {
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+/* Horizontal Rotating Ticker Animation */
+@keyframes tickerHorizontalLoop {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-horizontal-rotate {
+  display: flex;
+  width: max-content;
+  animation: tickerHorizontalLoop 35s linear infinite;
+}
+
+.animate-horizontal-rotate:hover {
+  animation-play-state: paused;
+}
+
+/* Light Theme Styling Overrides */
+html.light {
+  color-scheme: light;
+}
+
+html.light body {
+  background-color: #f4f4f5;
+  color: #18181b;
+}
+
+html.light header {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-color: #e4e4e7 !important;
+  color: #18181b !important;
+}
+
+html.light header span.html-light-text-zinc-900 {
+  color: #18181b !important;
+}
+
+html.light header nav {
+  background-color: #f4f4f5 !important;
+  border-color: #e4e4e7 !important;
+}
+
+html.light header nav button {
+  color: #52525b;
+}
+
+html.light header nav button:hover {
+  color: #18181b;
+  background-color: #e4e4e7 !important;
+}
+
+html.light header input {
+  background-color: #f4f4f5 !important;
+  border-color: #e4e4e7 !important;
+  color: #18181b !important;
+}
+
+html.light header input::placeholder {
+  color: #71717a !important;
+}
+
+html.light #nav-currency-toggle,
+html.light #nav-theme-toggle-btn,
+html.light #nav-wishlist-btn,
+html.light #nav-cart-btn,
+html.light #nav-admin-portal-btn {
+  background-color: #ffffff !important;
+  border-color: #e4e4e7 !important;
+  color: #18181b !important;
+}
+
+html.light #nav-currency-toggle:hover,
+html.light #nav-theme-toggle-btn:hover,
+html.light #nav-wishlist-btn:hover,
+html.light #nav-cart-btn:hover,
+html.light #nav-admin-portal-btn:hover {
+  background-color: #f4f4f5 !important;
+}
+
+html.light [id^="product-card-"] {
+  background-color: #ffffff !important;
+  border-color: #e4e4e7 !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+}
+
+html.light [id^="product-card-"] h3 {
+  color: #18181b !important;
+}
+
+html.light [id^="product-card-"] .aspect-4\/3 {
+  background-color: #f4f4f5 !important;
+}
+
+html.light select,
+html.light input[type="text"],
+html.light input[type="number"] {
+  background-color: #ffffff;
+  color: #18181b;
+  border-color: #e4e4e7;
+}
+
+html.light select option {
+  background-color: #ffffff;
+  color: #18181b;
+}
+
+html.light #catalogue-section h2 {
+  color: #18181b !important;
+}
+
+html.light #catalogue-section label,
+html.light #catalogue-section .bg-zinc-900 {
+  background-color: #ffffff !important;
+  border-color: #e4e4e7 !important;
+  color: #18181b !important;
+}
+
+html.light #catalogue-section select {
+  color: #18181b !important;
+}
+
+html.light footer {
+  background-color: #ffffff !important;
+  border-color: #e4e4e7 !important;
+  color: #18181b !important;
+}
+
+html.light footer h4 {
+  color: #18181b !important;
+}
+
+html.light footer .text-zinc-400 {
+  color: #71717a !important;
+}
+
+html.light footer .bg-zinc-900 {
+  background-color: #f4f4f5 !important;
+  border-color: #e4e4e7 !important;
+}

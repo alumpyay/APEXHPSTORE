@@ -1,0 +1,64 @@
+{
+  "collections": [
+    {
+      "name": "products",
+      "description": "Store products (jerseys)",
+      "fields": [
+        { "name": "id", "type": "string" },
+        { "name": "name", "type": "string" },
+        { "name": "price", "type": "number" },
+        { "name": "stockStatus", "type": "string" }
+      ],
+      "rules": {
+        "read": "true",
+        "write": "request.auth != null"
+      }
+    },
+    {
+      "name": "orders",
+      "description": "Customer orders",
+      "fields": [
+        { "name": "id", "type": "string" },
+        { "name": "customer", "type": "map" },
+        { "name": "status", "type": "string" }
+      ],
+      "rules": {
+        "read": "request.auth != null || (resource.data.customer.email == request.auth.token.email)",
+        "write": "request.auth != null || request.resource.data.status == 'Order Placed'"
+      }
+    },
+    {
+      "name": "site_content",
+      "description": "Site content settings (singleton doc 'main')",
+      "fields": [
+        { "name": "heroTitle", "type": "string" }
+      ],
+      "rules": {
+        "read": "true",
+        "write": "request.auth != null"
+      }
+    },
+    {
+      "name": "payment_accounts",
+      "description": "Admin payment accounts",
+      "fields": [
+        { "name": "id", "type": "string" }
+      ],
+      "rules": {
+        "read": "true",
+        "write": "request.auth != null"
+      }
+    },
+    {
+      "name": "delivery_rates",
+      "description": "Delivery region rates",
+      "fields": [
+        { "name": "id", "type": "string" }
+      ],
+      "rules": {
+        "read": "true",
+        "write": "request.auth != null"
+      }
+    }
+  ]
+}

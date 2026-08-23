@@ -1,0 +1,451 @@
+--- src/context/StoreContext.tsx
++++ src/context/StoreContext.tsx
+@@ -2,6 +2,8 @@
+ import { Product, CartItem, Order, FilterState, JerseySize, CurrencyRate, OrderStatus, SiteContent, PaymentAccount } from '../types';
+ import { INITIAL_PRODUCTS, INITIAL_CURRENCIES, MOCK_ORDERS } from '../data/initialProducts';
+ import { MYANMAR_DELIVERY_REGIONS, MyanmarRegion, MyanmarTownshipRate } from '../data/myanmarDeliveryRates';
++import { db, auth, googleProvider } from '../lib/firebase';
++import { collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, getDoc, query } from 'firebase/firestore';
++import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
+ 
+ export const INITIAL_PAYMENT_ACCOUNTS: PaymentAccount[] = [
+   {
+@@ -108,7 +110,7 @@
+ 
+   // Admin Management
+   isAdminLoggedIn: boolean;
+-  loginAdmin: (password: string) => boolean;
++  loginAdmin: () => Promise<boolean>;
+   logoutAdmin: () => void;
+   addProduct: (product: Omit<Product, 'id'>) => void;
+   updateProduct: (id: string, updatedFields: Partial<Product>) => void;
+@@ -178,21 +180,24 @@
+ 
+ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+-  // Local storage loaded states with fallback
+-  const [products, setProducts] = useState<Product[]>(() => {
+-    const saved = localStorage.getItem('apex_products_v4');
+-    if (saved) {
+-      try {
+-        const parsed: Product[] = JSON.parse(saved);
+-        const hasLegacySports = parsed.some((p: any) => p.sport === 'Basketball' || p.sport === 'American Football');
+-        if (!hasLegacySports && parsed.length > 0) {
+-          return parsed;
+-        }
+-      } catch (e) {
+-        console.error('Failed to parse products', e);
+-      }
+-    }
+-    return INITIAL_PRODUCTS;
+-  });
++  // Firebase loaded states
++  const [products, setProducts] = useState<Product[]>([]);
++  const [orders, setOrders] = useState<Order[]>([]);
++  const [siteContent, setSiteContent] = useState<SiteContent>(defaultSiteContent);
++  const [paymentAccounts, setPaymentAccounts] = useState<PaymentAccount[]>(INITIAL_PAYMENT_ACCOUNTS);
++  const [deliveryRegions, setDeliveryRegions] = useState<MyanmarRegion[]>(MYANMAR_DELIVERY_REGIONS);
++  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState<boolean>(false);
++
++  useEffect(() => {
++    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
++      setIsAdminLoggedIn(!!user);
++    });
++    
++    const unsubscribeProducts = onSnapshot(collection(db, 'products'), (snapshot) => {
++      if (snapshot.empty && !isAdminLoggedIn) {
++         setProducts(INITIAL_PRODUCTS); // fallback to initial if db empty
++      } else if (!snapshot.empty) {
++         const p: Product[] = [];
++         snapshot.forEach(d => p.push(d.data() as Product));
++         setProducts(p);
++      }
++    });
++
++    return () => {
++      unsubscribeAuth();
++      unsubscribeProducts();
++    };
++  }, [isAdminLoggedIn]);
++
++  useEffect(() => {
++    let unsubOrders = () => {};
++    let unsubPayment = () => {};
++    let unsubDelivery = () => {};
++    let unsubSite = () => {};
++
++    if (isAdminLoggedIn) {
++      unsubOrders = onSnapshot(collection(db, 'orders'), (snapshot) => {
++        const o: Order[] = [];
++        snapshot.forEach(d => o.push(d.data() as Order));
++        // sort by newest
++        setOrders(o.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
++      });
++    }
++
++    unsubSite = onSnapshot(doc(db, 'site_content', 'main'), (docSnap) => {
++      if (docSnap.exists()) {
++        setSiteContent({ ...defaultSiteContent, ...docSnap.data() as SiteContent });
++      }
++    });
++
++    unsubPayment = onSnapshot(doc(db, 'payment_accounts', 'main'), (docSnap) => {
++      if (docSnap.exists()) {
++        setPaymentAccounts(docSnap.data().accounts as PaymentAccount[]);
++      }
++    });
++
++    unsubDelivery = onSnapshot(doc(db, 'delivery_rates', 'main'), (docSnap) => {
++      if (docSnap.exists()) {
++        setDeliveryRegions(docSnap.data().regions as MyanmarRegion[]);
++      }
++    });
++
++    return () => {
++      unsubOrders();
++      unsubSite();
++      unsubPayment();
++      unsubDelivery();
++    }
++  }, [isAdminLoggedIn]);
+ 
+   const [cart, setCart] = useState<CartItem[]>(() => {
+@@ -218,22 +223,7 @@
+     return ['jersey-rm-bellingham-2425'];
+   });
+ 
+-  const [orders, setOrders] = useState<Order[]>(() => {
+-    const saved = localStorage.getItem('apex_orders');
+-    if (saved) {
+-      try {
+-        return JSON.parse(saved);
+-      } catch (e) {
+-        console.error('Failed to parse orders', e);
+-      }
+-    }
+-    return MOCK_ORDERS as unknown as Order[];
+-  });
+ 
+   const [currentCurrency, setCurrentCurrency] = useState<string>(() => {
+@@ -237,9 +227,6 @@
+     if (saved && INITIAL_CURRENCIES[saved]) return saved;
+     return 'MMK';
+   });
+-  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState<boolean>(() => {
+-    return localStorage.getItem('apex_admin_auth') === 'true';
+-  });
+ 
+   const [theme, setThemeState] = useState<'dark' | 'light'>(() => {
+@@ -268,26 +255,14 @@
+     }
+   }, [theme]);
+ 
+-  // Site Content state with LocalStorage sync
+-  const [siteContent, setSiteContent] = useState<SiteContent>(() => {
+-    const saved = localStorage.getItem('apex_site_content_v2');
+-    if (saved) {
+-      try {
+-        return { ...defaultSiteContent, ...JSON.parse(saved) };
+-      } catch (e) {
+-        console.error('Failed to parse siteContent', e);
+-      }
+-    }
+-    return defaultSiteContent;
+-  });
+-
+-  useEffect(() => {
+-    localStorage.setItem('apex_site_content_v2', JSON.stringify(siteContent));
+-  }, [siteContent]);
+ 
+   const updateSiteContent = (newContent: Partial<SiteContent>) => {
+-    setSiteContent(prev => ({ ...prev, ...newContent }));
++    const updated = { ...siteContent, ...newContent };
++    setSiteContent(updated);
++    setDoc(doc(db, 'site_content', 'main'), updated, { merge: true });
+   };
+ 
+   const resetSiteContent = () => {
+     setSiteContent(defaultSiteContent);
+-    localStorage.setItem('apex_site_content_v2', JSON.stringify(defaultSiteContent));
++    setDoc(doc(db, 'site_content', 'main'), defaultSiteContent, { merge: true });
+   };
+ 
+@@ -313,38 +288,27 @@
+   const [filters, setFilters] = useState<FilterState>(defaultFilterState);
+ 
+-  // Myanmar Delivery Regions and Custom Rates state
+-  const [deliveryRegions, setDeliveryRegions] = useState<MyanmarRegion[]>(() => {
+-    const saved = localStorage.getItem('apex_delivery_regions_v2');
+-    if (saved) {
+-      try {
+-        const parsed = JSON.parse(saved);
+-        if (Array.isArray(parsed) && parsed.length > 0) {
+-          return parsed;
+-        }
+-      } catch (e) {
+-        console.error('Failed to parse saved delivery regions', e);
+-      }
+-    }
+-    return MYANMAR_DELIVERY_REGIONS;
+-  });
+-
+-  useEffect(() => {
+-    localStorage.setItem('apex_delivery_regions_v2', JSON.stringify(deliveryRegions));
+-  }, [deliveryRegions]);
+-
+   const updateTownshipDeliveryRate = (
+     regionId: string,
+     townshipId: string,
+     updates: Partial<MyanmarTownshipRate>
+   ) => {
+-    setDeliveryRegions(prev =>
+-      prev.map(reg => {
++    setDeliveryRegions(prev => {
++      const next = prev.map(reg => {
+         if (reg.id !== regionId) return reg;
+         return {
+           ...reg,
+           townships: reg.townships.map(t => {
+             if (t.id !== townshipId) return t;
+             return {
+               ...t,
+               ...updates,
+             };
+           }),
+         };
+-      })
+-    );
++      });
++      setDoc(doc(db, 'delivery_rates', 'main'), { regions: next }, { merge: true });
++      return next;
++    });
+   };
+ 
+   const adjustRegionDeliveryRates = (regionId: string, deltaMMK: number) => {
+-    setDeliveryRegions(prev =>
+-      prev.map(reg => {
++    setDeliveryRegions(prev => {
++      const next = prev.map(reg => {
+         if (reg.id !== regionId) return reg;
+         return {
+           ...reg,
+           townships: reg.townships.map(t => ({
+             ...t,
+             wepoztFeeMMK: Math.max(1000, t.wepoztFeeMMK + deltaMMK),
+           })),
+         };
+-      })
+-    );
++      });
++      setDoc(doc(db, 'delivery_rates', 'main'), { regions: next }, { merge: true });
++      return next;
++    });
+   };
+ 
+   const setRegionEstimatedDuration = (regionId: string, duration: string) => {
+-    setDeliveryRegions(prev =>
+-      prev.map(reg => {
++    setDeliveryRegions(prev => {
++      const next = prev.map(reg => {
+         if (reg.id !== regionId) return reg;
+         return {
+           ...reg,
+           townships: reg.townships.map(t => ({
+             ...t,
+             estimatedDays: duration,
+           })),
+         };
+-      })
+-    );
++      });
++      setDoc(doc(db, 'delivery_rates', 'main'), { regions: next }, { merge: true });
++      return next;
++    });
+   };
+ 
+   const resetRegionDeliveryRates = (regionId: string) => {
+     const defaultRegion = MYANMAR_DELIVERY_REGIONS.find(r => r.id === regionId);
+     if (!defaultRegion) return;
+-    setDeliveryRegions(prev =>
+-      prev.map(reg => {
++    setDeliveryRegions(prev => {
++      const next = prev.map(reg => {
+         if (reg.id !== regionId) return reg;
+         return defaultRegion;
+-      })
+-    );
++      });
++      setDoc(doc(db, 'delivery_rates', 'main'), { regions: next }, { merge: true });
++      return next;
++    });
+   };
+ 
+   const resetDeliveryRates = () => {
+     setDeliveryRegions(MYANMAR_DELIVERY_REGIONS);
+-    localStorage.setItem('apex_delivery_regions_v2', JSON.stringify(MYANMAR_DELIVERY_REGIONS));
++    setDoc(doc(db, 'delivery_rates', 'main'), { regions: MYANMAR_DELIVERY_REGIONS }, { merge: true });
+   };
+ 
+-  // Payment Accounts State (KBZPay, WavePay, AYA Pay, CB Pay)
+-  const [paymentAccounts, setPaymentAccounts] = useState<PaymentAccount[]>(() => {
+-    const saved = localStorage.getItem('apex_payment_accounts_v1');
+-    if (saved) {
+-      try {
+-        const parsed = JSON.parse(saved);
+-        if (Array.isArray(parsed) && parsed.length > 0) {
+-          return parsed;
+-        }
+-      } catch (e) {
+-        console.error('Failed to parse payment accounts', e);
+-      }
+-    }
+-    return INITIAL_PAYMENT_ACCOUNTS;
+-  });
+-
+   const updatePaymentAccount = (accountId: string, updates: Partial<PaymentAccount>) => {
+-    setPaymentAccounts(prev =>
+-      prev.map(acc => {
++    setPaymentAccounts(prev => {
++      const next = prev.map(acc => {
+         if (acc.id !== accountId) return acc;
+         return { ...acc, ...updates };
+-      })
+-    );
++      });
++      setDoc(doc(db, 'payment_accounts', 'main'), { accounts: next }, { merge: true });
++      return next;
++    });
+   };
+ 
+   const resetPaymentAccounts = () => {
+     setPaymentAccounts(INITIAL_PAYMENT_ACCOUNTS);
+-    localStorage.setItem('apex_payment_accounts_v1', JSON.stringify(INITIAL_PAYMENT_ACCOUNTS));
++    setDoc(doc(db, 'payment_accounts', 'main'), { accounts: INITIAL_PAYMENT_ACCOUNTS }, { merge: true });
+   };
+ 
+-  useEffect(() => {
+-    localStorage.setItem('apex_payment_accounts_v1', JSON.stringify(paymentAccounts));
+-  }, [paymentAccounts]);
+-
+-  // Sync to localStorage
+-  useEffect(() => {
+-    localStorage.setItem('apex_products_v4', JSON.stringify(products));
+-  }, [products]);
+-
+   useEffect(() => {
+     localStorage.setItem('apex_cart', JSON.stringify(cart));
+   }, [cart]);
+@@ -451,10 +406,6 @@
+     localStorage.setItem('apex_wishlist', JSON.stringify(wishlist));
+   }, [wishlist]);
+ 
+-  useEffect(() => {
+-    localStorage.setItem('apex_orders', JSON.stringify(orders));
+-  }, [orders]);
+-
+   const addToCart = (item: Omit<CartItem, 'id'>) => {
+     setCart(prev => {
+       const existingItem = prev.find(i => 
+@@ -528,7 +479,8 @@
+       status: 'Order Placed',
+     };
+-    setOrders(prev => [newOrder, ...prev]);
++    // Save to firebase
++    setDoc(doc(db, 'orders', newOrder.id), newOrder);
+     return newOrder;
+   };
+ 
+@@ -547,15 +499,14 @@
+       description: locationNote || `Order status updated to ${status}`,
+     };
+-    setOrders(prev => prev.map(order => {
+-      if (order.id !== orderId) return order;
+-      return {
+-        ...order,
+-        status,
+-        timeline: [newEvent, ...order.timeline],
+-      };
+-    }));
++    const orderRef = doc(db, 'orders', orderId);
++    getDoc(orderRef).then(snap => {
++      if (snap.exists()) {
++        const order = snap.data() as Order;
++        updateDoc(orderRef, {
++          status,
++          timeline: [newEvent, ...order.timeline]
++        });
++      }
++    });
+   };
+ 
+-  const loginAdmin = (password: string) => {
+-    if (password === 'admin123') {
+-      setIsAdminLoggedIn(true);
+-      localStorage.setItem('apex_admin_auth', 'true');
+-      return true;
+-    }
+-    return false;
++  const loginAdmin = async () => {
++    try {
++      await signInWithPopup(auth, googleProvider);
++      return true;
++    } catch (error) {
++      console.error(error);
++      return false;
++    }
+   };
+ 
+   const logoutAdmin = () => {
+-    setIsAdminLoggedIn(false);
+-    localStorage.removeItem('apex_admin_auth');
++    signOut(auth);
+   };
+ 
+   const addProduct = (product: Omit<Product, 'id'>) => {
+     const newId = `product-${Date.now()}`;
+-    setProducts(prev => [{ ...product, id: newId }, ...prev]);
++    setDoc(doc(db, 'products', newId), { ...product, id: newId });
+   };
+ 
+   const updateProduct = (id: string, updatedFields: Partial<Product>) => {
+-    setProducts(prev => prev.map(p => (p.id === id ? { ...p, ...updatedFields } : p)));
++    updateDoc(doc(db, 'products', id), updatedFields);
+   };
+ 
+   const deleteProduct = (id: string) => {
+-    setProducts(prev => prev.filter(p => p.id !== id));
++    deleteDoc(doc(db, 'products', id));
+   };
+ 
+   const updateInventory = (productId: string, size: JerseySize, newCount: number) => {
+-    setProducts(prev => prev.map(p => {
+-      if (p.id === productId) {
+-        return {
+-          ...p,
+-          inventory: {
+-            ...p.inventory,
+-            [size]: newCount,
+-          },
+-        };
+-      }
+-      return p;
+-    }));
++    const productRef = doc(db, 'products', productId);
++    getDoc(productRef).then(snap => {
++      if (snap.exists()) {
++         const p = snap.data() as Product;
++         updateDoc(productRef, {
++            [`inventory.${size}`]: newCount
++         });
++      }
++    });
+   };
+ 
+   const resetToDefaultData = () => {
+-    setProducts(INITIAL_PRODUCTS);
+-    localStorage.setItem('apex_products_v4', JSON.stringify(INITIAL_PRODUCTS));
++    INITIAL_PRODUCTS.forEach(p => {
++      setDoc(doc(db, 'products', p.id), p);
++    });
+   };
+ 
+   const value: StoreContextType = {

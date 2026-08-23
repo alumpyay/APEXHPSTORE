@@ -1,0 +1,41 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Check if user is an admin (in this case, any authenticated user with a google email will be treated as an admin since we only intend for the store owner to log in to this portal, but we can be more strict if we want, e.g. request.auth.token.email == 'specific@gmail.com'. We'll use request.auth != null for now as it restricts it to users who have logged in via Google Auth, which requires the admin portal access).
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == 'alumpy841@gmail.com';
+    }
+
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /orders/{orderId} {
+      // Anyone can create an order
+      allow create: if true;
+      // Admins can read all orders
+      // Users could theoretically read their own orders if we had customer auth, but this is guest checkout. So we restrict reads to admin only for now. Guest checkout order tracking requires providing the ID and email in a specific cloud function, but here we can just restrict read to admin, or allow reading specific fields if needed. For now, admin read-only is safer. The Order Tracker modal will be hard to do purely client-side with firestore if we restrict read to admin.
+      // Let's allow reading an order if you know its ID (which the user gets after checkout).
+      allow get: if true;
+      allow list: if true;
+      allow update, delete: if isAdmin();
+    }
+    
+    match /site_content/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /payment_accounts/{accountId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /delivery_rates/{rateId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}

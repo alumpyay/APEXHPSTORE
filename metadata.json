@@ -1,0 +1,6 @@
+{
+  "name": "Apex Esports & Custom Jersey Studio",
+  "description": "MLBB Pro Esports & Football jersey e-commerce store with 3D custom jersey builder, squad roster builder, live inventory tracking, real-time shipment updates, Myanmar Kyat (MMK) currency support, nationwide Wepozt delivery fee management with editable rates, weight, and delivery duration.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
