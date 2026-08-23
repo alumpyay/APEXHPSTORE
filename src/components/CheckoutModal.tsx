@@ -708,24 +708,7 @@ export const CheckoutModal: React.FC = () => {
                       </div>
                     )}
 
-                    {/* Quick Demo Slip Helper */}
-                    {!receiptImage && (
-                      <div className="flex justify-end">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            // Demo receipt sample
-                            const sampleSlip = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'><rect width='400' height='200' fill='%230f172a'/><text x='20' y='40' fill='%23fbbf24' font-size='16' font-family='monospace' font-weight='bold'>${encodeURIComponent(selectedAccount.name.toUpperCase())} TRANSFER SUCCESSFUL</text><text x='20' y='80' fill='%23e2e8f0' font-size='12' font-family='sans-serif'>Paid To: ${encodeURIComponent(selectedAccount.accountName)}</text><text x='20' y='110' fill='%23e2e8f0' font-size='12' font-family='sans-serif'>TxID: KP798129841824</text><text x='20' y='140' fill='%234ade80' font-size='14' font-family='monospace' font-weight='bold'>Amount: ${encodeURIComponent(formatPrice(totalUSD))}</text><text x='20' y='170' fill='%2394a3b8' font-size='11' font-family='sans-serif'>Date: 2026-08-23 16:45 MMT</text></svg>`;
-                            setReceiptImage(sampleSlip);
-                            setReceiptFileName(`${selectedAccount.name}_Slip_Verified.png`);
-                          }}
-                          className="text-[10px] text-amber-400/80 hover:text-amber-300 underline cursor-pointer"
-                        >
-                          + Use Sample Payment Slip for Demo Test
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                    </div>
 
                   {/* Customer Phone or TxID input */}
                   <div className="space-y-1 pt-1">
