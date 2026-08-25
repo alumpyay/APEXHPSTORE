@@ -67,8 +67,8 @@ export const CheckoutModal: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Region and Township selection
-  const [selectedRegionId, setSelectedRegionId] = useState('yangon');
-  const [selectedTownshipId, setSelectedTownshipId] = useState('kamayut');
+  const [selectedRegionId, setSelectedRegionId] = useState('yangon-region');
+  const [selectedTownshipId, setSelectedTownshipId] = useState('yangon-region-kamayut');
   const [isExpressDelivery, setIsExpressDelivery] = useState(false);
 
   // Form states

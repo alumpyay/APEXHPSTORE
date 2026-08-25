@@ -76,7 +76,7 @@ export const AdminPortal: React.FC = () => {
   const [viewingReceiptOrder, setViewingReceiptOrder] = useState<Order | null>(null);
 
   // Delivery Fee & Wepozt Rates Tab State
-  const [selectedRegionId, setSelectedRegionId] = useState<string>('yangon');
+  const [selectedRegionId, setSelectedRegionId] = useState<string>('yangon-region');
   const [townshipSearch, setTownshipSearch] = useState<string>('');
   const [zoneFilter, setZoneFilter] = useState<string>('all');
   const [copiedBranchCode, setCopiedBranchCode] = useState<string | null>(null);
@@ -86,8 +86,8 @@ export const AdminPortal: React.FC = () => {
   const [customBatchDuration, setCustomBatchDuration] = useState<string>('');
 
   // Live Calculator State
-  const [calcRegionId, setCalcRegionId] = useState<string>('yangon');
-  const [calcTownshipId, setCalcTownshipId] = useState<string>('kamayut');
+  const [calcRegionId, setCalcRegionId] = useState<string>('yangon-region');
+  const [calcTownshipId, setCalcTownshipId] = useState<string>('yangon-region-kamayut');
   const [calcWeightKg, setCalcWeightKg] = useState<number>(0.5);
   const [calcIsExpress, setCalcIsExpress] = useState<boolean>(false);
 
