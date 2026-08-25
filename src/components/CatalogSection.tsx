@@ -26,7 +26,8 @@ export const CatalogSection: React.FC = () => {
     currentCurrency, 
     currencies,
     siteContent,
-    setIsSiteContentModalOpen
+    setIsSiteContentModalOpen,
+    isAdminLoggedIn
   } = useStore();
 
   // Extract unique teams for filters
@@ -121,6 +122,7 @@ export const CatalogSection: React.FC = () => {
         <div>
           <div className="flex items-center gap-2 text-amber-400 text-xs font-bold uppercase tracking-widest mb-1">
             <Sparkles className="w-3.5 h-3.5" /> MLBB & Football Collections
+            {isAdminLoggedIn && (
             <button
               onClick={() => setIsSiteContentModalOpen(true)}
               className="ml-2 p-1 hover:bg-amber-400/20 text-amber-300 rounded text-[10px] font-bold flex items-center gap-1 transition-colors"
@@ -129,6 +131,7 @@ export const CatalogSection: React.FC = () => {
               <Edit3 className="w-3 h-3" />
               <span>Edit Title</span>
             </button>
+            )}
           </div>
           <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
             {siteContent?.catalogHeading || 'AUTHENTIC JERSEY CATALOGUE'}

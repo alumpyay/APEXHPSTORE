@@ -18,7 +18,8 @@ export const SiteContentEditModal: React.FC = () => {
     setIsSiteContentModalOpen, 
     siteContent, 
     updateSiteContent,
-    resetSiteContent
+    resetSiteContent,
+    isAdminLoggedIn
   } = useStore();
 
   const [formData, setFormData] = useState<SiteContent>(siteContent);
@@ -31,7 +32,7 @@ export const SiteContentEditModal: React.FC = () => {
     }
   }, [isSiteContentModalOpen, siteContent]);
 
-  if (!isSiteContentModalOpen) return null;
+  if (!isSiteContentModalOpen || !isAdminLoggedIn) return null;
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();

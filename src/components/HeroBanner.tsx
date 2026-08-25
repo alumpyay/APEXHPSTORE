@@ -26,7 +26,8 @@ export const HeroBanner: React.FC = () => {
     formatPrice,
     siteContent,
     setIsSiteContentModalOpen,
-    setEditingProduct
+    setEditingProduct,
+    isAdminLoggedIn
   } = useStore();
 
   // Curate showcase kits across MLBB & Football
@@ -89,6 +90,7 @@ export const HeroBanner: React.FC = () => {
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900/90 border border-zinc-800 text-xs font-semibold text-amber-400 backdrop-blur-sm shadow-md">
             <Flame className="w-3.5 h-3.5 fill-amber-400 animate-bounce" />
             <span>{siteContent?.heroFlameBadge || 'MLBB Esports & Football Pro Match Drops'}</span>
+            {isAdminLoggedIn && (
             <button
               onClick={() => setIsSiteContentModalOpen(true)}
               className="ml-2 p-1 hover:bg-amber-400/20 rounded-md text-amber-300 transition-colors"
@@ -96,6 +98,7 @@ export const HeroBanner: React.FC = () => {
             >
               <Edit3 className="w-3 h-3" />
             </button>
+            )}
           </div>
 
           <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight font-sans">

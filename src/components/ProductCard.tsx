@@ -23,7 +23,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     toggleWishlist, 
     isInWishlist, 
     setSelectedProduct, 
-    setEditingProduct
+    setEditingProduct,
+    isAdminLoggedIn
   } = useStore();
 
   const [selectedSize, setSelectedSize] = useState<JerseySize>('M');
@@ -134,17 +135,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         {/* Top Right Action Buttons (Edit + Wishlist) */}
         <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10">
           {/* Quick Edit Button */}
-          <button
-            id={`card-edit-btn-${product.id}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              setEditingProduct(product);
-            }}
-            title="Edit Photo & Details (ပုံနှင့် စာပြင်ရန်)"
-            className="w-8 h-8 rounded-full bg-zinc-900/90 hover:bg-amber-400 hover:text-zinc-950 backdrop-blur-md border border-zinc-700/80 flex items-center justify-center text-amber-400 hover:scale-110 transition-all shadow-md"
-          >
-            <Edit3 className="w-3.5 h-3.5" />
-          </button>
+          {isAdminLoggedIn && (
+            <button
+              id={`card-edit-btn-${product.id}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setEditingProduct(product);
+              }}
+              title="Edit Photo & Details (ပုံနှင့် စာပြင်ရန်)"
+              className="w-8 h-8 rounded-full bg-zinc-900/90 hover:bg-amber-400 hover:text-zinc-950 backdrop-blur-md border border-zinc-700/80 flex items-center justify-center text-amber-400 hover:scale-110 transition-all shadow-md"
+            >
+              <Edit3 className="w-3.5 h-3.5" />
+            </button>
+          )}
 
           {/* Wishlist Button */}
           <button

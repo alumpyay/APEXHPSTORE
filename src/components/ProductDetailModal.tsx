@@ -23,7 +23,8 @@ export const ProductDetailModal: React.FC = () => {
     toggleWishlist, 
     isInWishlist, 
     setIsCartOpen,
-    setEditingProduct
+    setEditingProduct,
+    isAdminLoggedIn
   } = useStore();
 
   const [selectedSize, setSelectedSize] = useState<JerseySize>('M');
@@ -212,19 +213,21 @@ export const ProductDetailModal: React.FC = () => {
                   <Sparkles className="w-3.5 h-3.5" />
                   <span className="uppercase tracking-wider">Fabric & Specs</span>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const prodToEdit = selectedProduct;
-                    setSelectedProduct(null);
-                    setEditingProduct(prodToEdit);
-                  }}
-                  className="flex items-center gap-1 text-[10px] font-bold text-zinc-400 hover:text-amber-400 bg-zinc-900 hover:bg-zinc-800 px-2 py-0.5 rounded-md border border-zinc-800 transition-colors"
-                  title="Fabric & Specs ပြင်ဆင်ရန်"
-                >
-                  <Edit3 className="w-3 h-3 text-amber-400" />
-                  <span>Edit (ပြင်မည်)</span>
-                </button>
+                {isAdminLoggedIn && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const prodToEdit = selectedProduct;
+                      setSelectedProduct(null);
+                      setEditingProduct(prodToEdit);
+                    }}
+                    className="flex items-center gap-1 text-[10px] font-bold text-zinc-400 hover:text-amber-400 bg-zinc-900 hover:bg-zinc-800 px-2 py-0.5 rounded-md border border-zinc-800 transition-colors"
+                    title="Fabric & Specs ပြင်ဆင်ရန်"
+                  >
+                    <Edit3 className="w-3 h-3 text-amber-400" />
+                    <span>Edit (ပြင်မည်)</span>
+                  </button>
+                  )}
               </div>
               {selectedProduct.fabricDetails && selectedProduct.fabricDetails.length > 0 ? (
                 <ul className="text-xs text-zinc-300 space-y-1.5 pl-4 list-disc marker:text-amber-400">
@@ -253,6 +256,7 @@ export const ProductDetailModal: React.FC = () => {
                   <h1 className="text-xl sm:text-2xl font-black text-white leading-snug">
                     {selectedProduct.name}
                   </h1>
+                  {isAdminLoggedIn && (
                   <button
                     onClick={() => {
                       const prodToEdit = selectedProduct;
@@ -265,6 +269,7 @@ export const ProductDetailModal: React.FC = () => {
                     <Edit3 className="w-3.5 h-3.5" />
                     <span>Edit (ပြင်မည်)</span>
                   </button>
+                  )}
                 </div>
                 <div className="flex items-baseline gap-2 mt-2">
                   <span className="text-2xl font-black text-white font-mono">

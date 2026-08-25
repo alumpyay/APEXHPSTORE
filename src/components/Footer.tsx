@@ -85,6 +85,7 @@ export const Footer: React.FC = () => {
               <span className="text-xs font-bold text-amber-400 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
                 MMK (Ks)
               </span>
+              {isAdminLoggedIn && (
               <button
                 onClick={() => setIsSiteContentModalOpen(true)}
                 className="ml-2 text-zinc-500 hover:text-amber-400 p-1 flex items-center gap-1 transition-colors"
@@ -93,6 +94,7 @@ export const Footer: React.FC = () => {
                 <Edit3 className="w-3.5 h-3.5" />
                 <span className="text-[10px]">Edit Texts</span>
               </button>
+              )}
             </div>
           </div>
 
