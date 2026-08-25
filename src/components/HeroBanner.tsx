@@ -338,6 +338,7 @@ export const HeroBanner: React.FC = () => {
               </div>
 
               <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                {isAdminLoggedIn && (
                 <button
                   onClick={() => {
                     if (activeKit) {
@@ -350,6 +351,7 @@ export const HeroBanner: React.FC = () => {
                   <Edit3 className="w-4 h-4" />
                   <span>Edit Kit (ပြင်မည်)</span>
                 </button>
+                )}
 
                 <button
                   id="hero-order-now-cta"
