@@ -653,22 +653,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (localFound) return localFound;
 
     try {
-      const trackingQuery = query(collection(db, 'orders'), where('trackingNumber', '==', cleanQuery));
-      const trackingSnap = await getDocs(trackingQuery);
-      if (!trackingSnap.empty) {
-        return trackingSnap.docs[0].data() as Order;
-      }
-
+      // Direct doc fetch to comply with strict security rules. Querying all orders is forbidden.
       const docRef = doc(db, 'orders', cleanQuery);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         return docSnap.data() as Order;
-      }
-      
-      const emailQuery = query(collection(db, 'orders'), where('customer.email', '==', cleanEmail));
-      const emailSnap = await getDocs(emailQuery);
-      if (!emailSnap.empty) {
-        return emailSnap.docs[0].data() as Order;
       }
     } catch (err) {
       console.error("Error finding order in DB:", err);
