@@ -576,9 +576,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const isInWishlist = (productId: string) => wishlist.includes(productId);
 
   const createOrder = (orderData: Omit<Order, 'id' | 'trackingNumber' | 'createdAt' | 'timeline'>): Order => {
-    const randomCode = Math.floor(1000 + Math.random() * 9000);
-    const trackingNum = `APX-${randomCode}-US`;
-    const orderId = `ORD-${Date.now().toString().slice(-6)}`;
+    const randomCode = Math.floor(100000 + Math.random() * 900000);
+    const trackingNum = `APX-${Date.now().toString().slice(-4)}${randomCode}`;
+    const orderId = trackingNum;
     const now = new Date().toISOString();
     const formattedNow = new Date().toLocaleDateString('en-US', {
       month: 'short',

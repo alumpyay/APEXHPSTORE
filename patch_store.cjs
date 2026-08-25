@@ -1,33 +1,25 @@
 const fs = require('fs');
 let content = fs.readFileSync('src/context/StoreContext.tsx', 'utf-8');
 
+// Update createOrder
 content = content.replace(
-  /findOrderByTracking: \(trackingNumber: string\) => Order \| undefined;/,
-  `findOrderByTracking: (trackingNumber: string) => Promise<Order | undefined>;`
+  /const randomCode = Math\.floor\(1000 \+ Math\.random\(\) \* 9000\);\s*const trackingNum = \`APX-\$\{randomCode\}-US\`;\s*const orderId = \`ORD-\$\{Date\.now\(\)\.toString\(\)\.slice\(-6\)\}\`;/g,
+  `const randomCode = Math.floor(100000 + Math.random() * 900000);
+    const trackingNum = \`APX-\${Date.now().toString().slice(-4)}\${randomCode}\`;
+    const orderId = trackingNum;`
 );
 
-content = content.replace(
-  /unsubOrders = onSnapshot\(collection\(db, 'orders'\), \(snapshot\) => \{\s*const o: Order\[\] = \[\];\s*snapshot\.forEach\(d => o\.push\(d\.data\(\) as Order\)\);\s*setOrders\(o\.sort\(\(a,b\) => new Date\(b\.createdAt\)\.getTime\(\) - new Date\(a\.createdAt\)\.getTime\(\)\)\);\s*\}\);/,
-  `if (isAdminLoggedIn) {
-      unsubOrders = onSnapshot(collection(db, 'orders'), (snapshot) => {
-        const o: Order[] = [];
-        snapshot.forEach(d => o.push(d.data() as Order));
-        setOrders(o.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
-      });
-    }`
-);
-
-const searchFuncRegex = /const findOrderByTracking = \(trackingNumber: string\): Order \| undefined => \{\s*const cleanQuery = trackingNumber\.trim\(\)\.toUpperCase\(\);\s*return orders\.find\(\s*\(\o\) =>\s*o\.trackingNumber\.toUpperCase\(\) === cleanQuery \|\|\s*o\.id\.toUpperCase\(\) === cleanQuery \|\|\s*o\.customer\.email\.toLowerCase\(\) === cleanQuery\.toLowerCase\(\)\s*\);\s*\};/;
-
-const newSearchFunc = `const findOrderByTracking = async (trackingNumber: string): Promise<Order | undefined> => {
+// Update findOrderByTracking
+const oldFind = `const findOrderByTracking = async (trackingNumber: string): Promise<Order | undefined> => {
     const cleanQuery = trackingNumber.trim().toUpperCase();
     const cleanEmail = trackingNumber.trim().toLowerCase();
-    
+
+    // 1. Try local state first (instant if already loaded via admin)
     const localFound = orders.find(
-      (o) =>
+      o => 
         o.trackingNumber.toUpperCase() === cleanQuery ||
-        o.id.toUpperCase() === cleanQuery ||
-        o.customer.email.toLowerCase() === cleanEmail
+        o.customer.email.toLowerCase() === cleanEmail ||
+        o.id === cleanQuery
     );
 
     if (localFound) return localFound;
@@ -56,7 +48,39 @@ const newSearchFunc = `const findOrderByTracking = async (trackingNumber: string
     return undefined;
   };`;
 
-content = content.replace(searchFuncRegex, newSearchFunc);
+const newFind = `const findOrderByTracking = async (trackingNumber: string): Promise<Order | undefined> => {
+    const cleanQuery = trackingNumber.trim().toUpperCase();
+    const cleanEmail = trackingNumber.trim().toLowerCase();
+
+    // 1. Try local state first (instant if already loaded via admin)
+    const localFound = orders.find(
+      o => 
+        o.trackingNumber.toUpperCase() === cleanQuery ||
+        o.customer.email.toLowerCase() === cleanEmail ||
+        o.id === cleanQuery
+    );
+
+    if (localFound) return localFound;
+
+    try {
+      // For security, non-admins cannot list orders or query by email.
+      // They must use the exact Tracking ID (which is the document ID).
+      const docRef = doc(db, 'orders', cleanQuery);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        return docSnap.data() as Order;
+      }
+    } catch (err) {
+      console.error("Error finding order in DB:", err);
+    }
+    return undefined;
+  };`;
+
+if (content.includes('const trackingNum = `APX-${randomCode}-US`;')) {
+  console.log("Replacing createOrder logic...");
+}
+
+content = content.replace(oldFind, newFind);
 
 fs.writeFileSync('src/context/StoreContext.tsx', content);
-console.log("Patched StoreContext!");
+console.log('StoreContext patched successfully.');
