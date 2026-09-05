@@ -17,6 +17,7 @@ import { AdminPortal } from './components/AdminPortal';
 import { ProductEditModal } from './components/ProductEditModal';
 import { SiteContentEditModal } from './components/SiteContentEditModal';
 import { Footer } from './components/Footer';
+import { VerifyPage } from './components/VerifyPage';
 
 function MainApp() {
   const { theme } = useStore();
@@ -52,6 +53,14 @@ function MainApp() {
 }
 
 export default function App() {
+  const isVerifyRoute = 
+    window.location.pathname === '/verify' || 
+    window.location.hostname.startsWith('verify.');
+
+  if (isVerifyRoute) {
+    return <VerifyPage />;
+  }
+
   return (
     <StoreProvider>
       <MainApp />
