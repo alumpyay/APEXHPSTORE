@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
+import cors from 'cors';
 import { aesCmac } from 'node-aes-cmac';
 import { createServer as createViteServer } from 'vite';
 
@@ -16,11 +17,31 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
+  // Allow cross-origin requests from the Android NFC Provisioner App
+  app.use(cors());
   app.use(express.json({ limit: '10mb' }));
 
   // Health check
   app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
+  // NTAG Provisioning Endpoint (For Android App)
+  app.post('/api/provision', (req, res) => {
+    const { uid, initialCounter } = req.body;
+    
+    if (!uid) {
+      return res.status(400).json({ success: false, error: "UID is required" });
+    }
+
+    // Register the tag in the system with its initial counter
+    lastKnownCounters[uid] = initialCounter || 0;
+    
+    return res.json({ 
+      success: true, 
+      message: "Tag provisioned successfully",
+      data: { uid, counter: lastKnownCounters[uid] }
+    });
   });
 
   // NTAG Verification Endpoint
