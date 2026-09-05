@@ -59,6 +59,18 @@
         "read": "true",
         "write": "request.auth != null"
       }
+    },
+    {
+      "name": "ntag_counters",
+      "description": "NFC tag scan counters",
+      "fields": [
+        { "name": "counter", "type": "number" },
+        { "name": "updatedAt", "type": "string" }
+      ],
+      "rules": {
+        "read": "true",
+        "write": "true"
+      }
     }
   ]
 }

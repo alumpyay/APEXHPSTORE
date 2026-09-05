@@ -39,5 +39,9 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+    
+    match /ntag_counters/{uid} {
+      allow read, write: if true;
+    }
   }
 }
